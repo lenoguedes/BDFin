@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Entity Validations
+
+    function isValidUserDoc(data, userId) {
+      return data.uid == userId
+        && data.email is string
+        && data.email.size() <= 256
+        && (data.categoriesConfig == null || data.categoriesConfig is list)
+        && (data.updatedAt == null || data.updatedAt is string || data.updatedAt is timestamp);
+    }
+
+    function isValidMonthCompetence(data) {
+      return data.monthYear is string
+        && data.monthYear.size() <= 64
+        && data.income is number
+        && data.transactions is list
+        && (data.additionalIncomes == null || data.additionalIncomes is list)
+        && (data.updatedAt == null || data.updatedAt is string || data.updatedAt is timestamp);
+    }
+
+    // User profiles and configurations
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserDoc(incoming(), userId);
+      allow update: if isOwner(userId) && isValidId(userId) && isValidUserDoc(incoming(), userId);
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      // Monthly competences
+      match /competences/{monthYear} {
+        allow get: if isOwner(userId) && isValidId(userId) && isValidId(monthYear);
+        allow list: if isOwner(userId) && isValidId(userId);
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(monthYear) && isValidMonthCompetence(incoming());
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(monthYear) && isValidMonthCompetence(incoming());
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(monthYear);
+      }
+    }
+  }
+}
