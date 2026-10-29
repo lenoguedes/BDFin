@@ -1,0 +1,8 @@
+{
+  "name": "BDFin v1",
+  "description": "Plataforma Inteligente de Gestão de Previsibilidade Financeira e Controle de Gastos por Exceção.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

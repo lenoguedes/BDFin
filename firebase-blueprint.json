@@ -1,0 +1,39 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile and Configuration",
+      "description": "Stores user config and global parameters like default category list config.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "categoriesConfig": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "MonthCompetence": {
+      "title": "Month Competence",
+      "description": "Stores transaction records and income data for a specific month competence.",
+      "type": "object",
+      "properties": {
+        "monthYear": { "type": "string" },
+        "income": { "type": "number" },
+        "transactions": { "type": "array" },
+        "additionalIncomes": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["monthYear", "income", "transactions"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profile with default parameter configs."
+    },
+    "users/{userId}/competences/{monthYear}": {
+      "schema": "MonthCompetence",
+      "description": "Month-by-month financial transaction and income logs."
+    }
+  }
+}
